@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vizyon Laboratuvarı · Ada</title>
+<meta name="robots" content="noindex">
+<style>
+:root { --bg:#FAF7F2; --ink:#1C1C20; --muted:#6E6E76; --card:#FFFFFF; --line:#E8E2DA; --accent:#C4783C; --accent-ink:#FFFFFF;
+        --yellow:#FFD84D; --good:#1F9D55; --bad:#D64545; --scan:rgba(196,120,60,.55); --shadow:0 10px 30px rgba(28,28,32,.08); }
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#141416; --ink:#F3F1EE; --muted:#A3A3AB; --card:#1E1E22; --line:#2E2E34; --accent:#E0915A; --accent-ink:#141416;
+          --good:#3CC07A; --bad:#F06A6A; --scan:rgba(224,145,90,.6); --shadow:0 10px 30px rgba(0,0,0,.35); }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); }
+body { font: 16px/1.55 "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif; }
+main { max-width: 620px; margin: 0 auto; padding: 22px 16px 60px; }
+.pill { display:inline-block; font-size:13px; font-weight:600; color:var(--muted); border:1px solid var(--line); border-radius:999px; padding:4px 12px; background:var(--card); }
+h1 { font-size: 36px; line-height: 1.08; margin: 14px 0 8px; font-weight: 900; letter-spacing: -.02em; }
+h1 span { background: var(--yellow); color: #1C1C20; padding: 0 8px; border-radius: 10px; }
+h2 { font-size: 18px; margin: 0 0 10px; }
+.sub { color: var(--muted); margin: 0 0 18px; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; box-shadow: var(--shadow); }
+label { display:block; font-weight:700; font-size:14px; margin:0 0 6px; }
+input[type=text], textarea { width:100%; font:inherit; color:var(--ink); background:var(--bg); border:1px solid var(--line); border-radius:14px; padding:12px 14px; outline:none; }
+input:focus, textarea:focus { border-color: var(--accent); }
+.row { margin-top: 12px; }
+button { font: inherit; cursor: pointer; border: 0; }
+.btn { width:100%; margin-top:14px; padding:15px; border-radius:14px; background:var(--accent); color:var(--accent-ink); font-weight:800; font-size:17px; }
+.btn[disabled] { opacity:.6; cursor:wait; }
+.note { font-size:12.5px; color:var(--muted); margin-top:10px; }
+.err { color: var(--bad); font-weight: 600; margin-top: 10px; }
+.hidden { display: none !important; }
+.demo { background: var(--yellow); color: #1C1C20; border-radius: 12px; padding: 8px 12px; font-size: 13px; font-weight: 700; margin-bottom: 14px; }
+.scan { position: relative; overflow: hidden; }
+.scan::after { content:""; position:absolute; left:0; right:0; top:0; height:3px; background:var(--scan); box-shadow:0 0 18px 6px var(--scan); animation: scan 1.4s ease-in-out infinite alternate; }
+@keyframes scan { from { top:0; } to { top: calc(100% - 3px); } }
+section.out { display: grid; gap: 14px; margin-top: 22px; }
+.blk { opacity: 0; transform: translateY(14px); transition: opacity .5s ease, transform .5s ease; }
+.blk.on { opacity: 1; transform: none; }
+.big { font-size: 20px; font-weight: 800; line-height: 1.35; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip { background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 6px 12px; font-weight: 700; font-size: 14px; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.kv b { display:block; font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.04em; }
+.days { display: grid; gap: 8px; }
+.day { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: start; background: var(--bg); border-radius: 14px; padding: 10px; }
+.day .n { background: var(--yellow); color:#1C1C20; border-radius: 10px; font-weight: 900; text-align:center; padding: 6px 0; }
+.day small { color: var(--muted); display:block; }
+.list { display: grid; gap: 10px; }
+.item { background: var(--bg); border-radius: 14px; padding: 12px; }
+.item b { display:block; margin-bottom: 4px; }
+.copy { margin-top: 8px; padding: 8px 12px; border-radius: 10px; background: var(--yellow); color:#1C1C20; font-weight: 800; font-size: 14px; }
+ol.chain { margin: 0; padding-left: 20px; }
+ol.chain li { margin: 6px 0; }
+.tools { display:flex; gap:8px; flex-wrap:wrap; }
+.ghost { padding: 10px 14px; border-radius: 12px; background: var(--bg); border:1px solid var(--line); color: var(--ink); font-weight: 700; }
+footer { margin-top: 28px; font-size: 12.5px; color: var(--muted); }
+@media (max-width: 420px) { .grid2 { grid-template-columns: 1fr; } }
+@media print { .noprint { display:none !important; } .blk { opacity:1; transform:none; } body { background:#fff; color:#000; } .card { box-shadow:none; } }
+@media (prefers-reduced-motion: reduce) { .blk { transition: none; } .scan::after { animation: none; } }
+</style>
+</head>
+<body>
+<main>
+  <div id="demoBanner" class="demo hidden">Örnek gösterim: sonuçlar önceden yazılmış örnektir, canlı yapay zekâ bağlantısı henüz açılmadı.</div>
+  <span class="pill">Vizyon Laboratuvarı · Deney 1</span>
+  <h1>İşini <span>60 saniyede</span> yeniden kur</h1>
+  <p class="sub">Tek cümleyle işini anlat. Yapay zekâ senin için konumlandırma, müşteri profili, 7 günlük Instagram planı, reklam metinleri ve müşteri mesajlarını aynı anda kursun.</p>
+
+  <form id="form" class="card noprint" autocomplete="off">
+    <div id="kodRow">
+      <label for="kod">Erişim kodun</label>
+      <input id="kod" type="text" maxlength="40" placeholder="Satın alınca e-postana gelen kod">
+    </div>
+    <div class="row">
+      <label for="is">İşin ne? (tek cümle)</label>
+      <input id="is" type="text" maxlength="200" required placeholder="Örn: Kadıköy'de el yapımı gümüş takı satıyorum">
+    </div>
+    <div class="row">
+      <label for="kitle">Kime satıyorsun? <span style="font-weight:400;color:var(--muted)">(isteğe bağlı)</span></label>
+      <input id="kitle" type="text" maxlength="200" placeholder="Örn: 25–35 yaş, hediye arayan kadınlar">
+    </div>
+    <div class="row">
+      <label for="dert">En büyük derdin ne? <span style="font-weight:400;color:var(--muted)">(isteğe bağlı)</span></label>
+      <input id="dert" type="text" maxlength="200" placeholder="Örn: Instagram'dan satış gelmiyor">
+    </div>
+    <button class="btn" id="go" type="submit">İşimi yeniden kur</button>
+    <p class="note">Yazdıkların cevap üretmek için Google Gemini'ye gönderilir. Kişisel bilgi (TC no, telefon, şifre) yazma. Yapay zekâ yanılabilir; sonuçları kendi bilginle kontrol et.</p>
+    <p class="err hidden" id="err" role="alert"></p>
+  </form>
+
+  <section class="out hidden" id="out" aria-live="polite">
+    <div class="card blk" id="bKonum"><h2>1 · Konumlandırman</h2><div class="big" id="konum"></div><div class="chips" id="slogan"></div></div>
+    <div class="card blk" id="bMusteri"><h2>2 · İdeal müşterin</h2><div class="grid2" id="musteri"></div></div>
+    <div class="card blk" id="bPlan"><h2>3 · 7 günlük Instagram planı</h2><div class="days" id="plan"></div></div>
+    <div class="card blk" id="bReklam"><h2>4 · 3 farklı açıdan reklam metni</h2><div class="list" id="reklam"></div></div>
+    <div class="card blk" id="bMesaj"><h2>5 · Hazır müşteri mesajları</h2><div class="list" id="mesaj"></div></div>
+    <div class="card blk" id="bZincir"><h2>Röntgen: bunu nasıl yaptı?</h2><ol class="chain" id="zincir"></ol></div>
+    <div class="card blk" id="bPrompt"><h2>Kendi ChatGPT / Gemini'nde yap</h2><div class="list" id="prompt"></div></div>
+    <div class="tools noprint blk" id="bTools"><button class="ghost" id="print" type="button">PDF olarak kaydet</button><button class="ghost" id="again" type="button">Başka bir iş dene</button></div>
+  </section>
+
+  <footer>Ada'nın Yapay Zekâ Vizyon Laboratuvarı · <a href="https://www.instagram.com/ada.ile.ai/" style="color:inherit">@ada.ile.ai</a></footer>
+</main>
+
+<script src="config.js"></script>
+<script>
+const q = new URLSearchParams(location.search);
+const CFG = window.ADA_AYAR || {};
+const API = q.get('api') || CFG.isini_kur_api || '';
+const DEMO = !API || q.get('demo') === '1';
+const $ = id => document.getElementById(id);
+const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+
+// Yalnızca bağlantı kurulmadan önceki önizleme için örnek (ekranda "Örnek gösterim" yazar).
+const ORNEK = {
+  konum: "Kadıköy'ün el yapımı gümüş atölyesi: her parça tek, her hediye hikâyeli.",
+  sloganlar: ["Tek üretilir, ömür boyu takılır.", "Hediyen hikâyesiyle gelsin.", "Kadıköy'den eline, elden yapım."],
+  musteri: { kim: "25–35 yaş, şehirli, hediye arayan kadın ve erkekler", derdi: "Sıradan, herkesin taktığı hediyeden kaçınmak", nerede: "Instagram Reels, Pinterest, yerel tasarım pazarları", tetik: "Doğum günü, yıl dönümü, 'kendime ödül' anları" },
+  plan: [
+    { gun: 1, kanca: "Bu yüzük 6 saatte doğdu", format: "Atölye hızlandırılmış video", fikir: "Bir yüzüğün ham gümüşten bitişe yolculuğu" },
+    { gun: 2, kanca: "Sevgiline bunu alma", format: "Karşılaştırma", fikir: "Seri üretim ile el yapımı farkını göster" },
+    { gun: 3, kanca: "Müşterim bu notu bıraktı", format: "Yorum ekranı + ürün", fikir: "Gerçek bir müşteri yorumunu (izinle) hikâyeleştir" },
+    { gun: 4, kanca: "Gümüşün kararmasını 10 saniyede önle", format: "İpucu", fikir: "Bakım ipucu, kaydetme odaklı" },
+    { gun: 5, kanca: "Adını yaz, kolyeni yapalım", format: "Kişiselleştirme demo", fikir: "İsim kolye sipariş süreci" },
+    { gun: 6, kanca: "Atölyede bir günüm", format: "Vlog", fikir: "Arkasındaki insanı göster" },
+    { gun: 7, kanca: "Hafta sonuna 3 parça kaldı", format: "Ürün vitrini", fikir: "Sınırlı stok, net CTA" }
+  ],
+  reklamlar: [
+    { aci: "Duygu", metin: "Herkesin taktığı hediyeyi değil, sadece onun taşıyacağı parçayı ver. Kadıköy atölyemizde elde yapılır, tek üretilir." },
+    { aci: "Fark", metin: "Seri üretim değil: her yüzük 6 saatlik el işçiliği. Gümüşü, ustayı ve hikâyeyi birlikte alırsın." },
+    { aci: "Aciliyet", metin: "Yıl dönümü yaklaşıyorsa: isim kolye siparişleri 3 günde hazır. Bu haftanın son 10 sırası açık." }
+  ],
+  mesajlar: [
+    { durum: "Fiyat soran", mesaj: "Merhaba! İlgin için teşekkürler 🙏 Bu model 1.250 TL; el yapımı ve tek üretim. Kime hediye alıyorsun, ölçüyü birlikte seçelim mi?" },
+    { durum: "Kararsız", mesaj: "Hiç acele yok. İstersen iki modeli aynı ışıkta çekip gönderebilirim, yan yana görünce karar vermek kolaylaşır." },
+    { durum: "Şikâyet", mesaj: "Bunu duyduğuma üzüldüm, hemen çözelim. Ürünün fotoğrafını gönderir misin? Gerekirse ücretsiz değişim yapıyoruz." },
+    { durum: "Teşekkür", mesaj: "Siparişin yola çıktı ✨ Taktığında bir fotoğrafını görmeyi çok isteriz, paylaşırsan seni etiketleriz." },
+    { durum: "Tekrar satış", mesaj: "Geçen ay aldığın yüzükle uyumlu yeni bir küpe tasarladık, sana özel ilk bakış: ister misin?" }
+  ],
+  zincir: [
+    { adim: "Konumlandırma", ne: "İşini, rakiplerden ayıran tek bir cümleye indirdi." },
+    { adim: "Müşteri", ne: "Kime satıldığını, derdini ve satın alma anını çıkardı." },
+    { adim: "İçerik", ne: "Müşterinin derdine göre 7 farklı kanca ve format seçti." },
+    { adim: "Satış dili", ne: "Aynı ürünü 3 farklı psikolojik açıdan anlattı ve 5 zor mesaja hazır cevap yazdı." }
+  ],
+  promptlar: [
+    "Sen deneyimli bir marka stratejistisin. İşim: [işin]. Kitlem: [kitle]. Beni rakiplerimden ayıran tek cümlelik bir konumlandırma ve 3 slogan yaz. Cevap vermeden önce eksik bilgileri bana soru olarak sor.",
+    "İşim: [işin], kitlem: [kitle]. Bu kitlenin derdine göre 7 günlük Instagram Reels planı yap: her gün için ilk 2 saniyelik kanca, format ve fikir. Tablo olarak ver.",
+    "İşim için şu 5 duruma kısa, samimi DM cevapları yaz: fiyat soran, kararsız, şikâyet eden, teşekkür, tekrar satış. Her biri en fazla 2 cümle."
+  ]
+};
+
+if (DEMO) { $('demoBanner').classList.remove('hidden'); $('kodRow').classList.add('hidden'); $('is').value = "Kadıköy'de el yapımı gümüş takı satıyorum"; }
+const saved = store.get('ada_kod'); if (saved) $('kod').value = saved;
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function copyBtn(text) { const b = el('button', 'copy', 'Kopyala'); b.type = 'button'; b.onclick = async () => { try { await navigator.clipboard.writeText(text); b.textContent = 'Kopyalandı ✓'; } catch { b.textContent = 'Seçip kopyala'; } setTimeout(() => b.textContent = 'Kopyala', 1600); }; return b; }
+
+async function call(body) {
+  if (DEMO) {
+    if (body.is !== "Kadıköy'de el yapımı gümüş takı satıyorum") throw new Error('Bu sayfa şu an örnek gösterim modunda: yazdığın iş analiz edilmez, yapay zekâ bağlantısı henüz açılmadı.');
+    await sleep(1800); return ORNEK;
+  }
+  const r = await fetch(API, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok || j.hata) throw new Error(j.hata || 'Şu an çalıştırılamadı, biraz sonra tekrar dene.');
+  return j;
+}
+
+async function render(d) {
+  $('out').classList.remove('hidden');
+  document.querySelectorAll('.blk').forEach(b => b.classList.remove('on'));
+  $('konum').textContent = d.konum;
+  $('slogan').replaceChildren(...(d.sloganlar || []).map(s => el('span', 'chip', s)));
+  const m = d.musteri || {};
+  $('musteri').replaceChildren(...[['Kim', m.kim], ['Derdi', m.derdi], ['Nerede', m.nerede], ['Satın alma anı', m.tetik]].map(([k, v]) => { const x = el('div', 'kv'); x.append(el('b', null, k), el('span', null, v || '')); return x; }));
+  $('plan').replaceChildren(...(d.plan || []).map(p => { const x = el('div', 'day'); const t = el('div'); t.append(el('strong', null, '“' + p.kanca + '”'), el('small', null, p.format + ' · ' + p.fikir)); x.append(el('div', 'n', 'G' + p.gun), t); return x; }));
+  $('reklam').replaceChildren(...(d.reklamlar || []).map(r => { const x = el('div', 'item'); x.append(el('b', null, r.aci), el('div', null, r.metin), copyBtn(r.metin)); return x; }));
+  $('mesaj').replaceChildren(...(d.mesajlar || []).map(r => { const x = el('div', 'item'); x.append(el('b', null, r.durum), el('div', null, r.mesaj), copyBtn(r.mesaj)); return x; }));
+  $('zincir').replaceChildren(...(d.zincir || []).map(z => { const li = el('li'); li.append(el('strong', null, z.adim + ': '), document.createTextNode(z.ne)); return li; }));
+  $('prompt').replaceChildren(...(d.promptlar || []).map(p => { const x = el('div', 'item'); x.append(el('div', null, p), copyBtn(p)); return x; }));
+  $('out').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  for (const id of ['bKonum', 'bMusteri', 'bPlan', 'bReklam', 'bMesaj', 'bZincir', 'bPrompt', 'bTools']) { await sleep(520); $(id).classList.add('on'); }
+}
+
+$('form').addEventListener('submit', async e => {
+  e.preventDefault();
+  $('err').classList.add('hidden');
+  const body = { kod: $('kod').value.trim(), is: $('is').value.trim(), kitle: $('kitle').value.trim(), dert: $('dert').value.trim() };
+  if (!DEMO && !body.kod) { $('err').textContent = 'Erişim kodunu gir.'; $('err').classList.remove('hidden'); return; }
+  if (body.is.length < 5) { $('err').textContent = 'İşini biraz daha anlat (en az 5 karakter).'; $('err').classList.remove('hidden'); return; }
+  $('go').disabled = true; $('go').textContent = 'Yapay zekâ işini kuruyor…'; $('form').classList.add('scan');
+  try { const d = await call(body); if (body.kod) store.set('ada_kod', body.kod); await render(d); }
+  catch (er) { $('err').textContent = er.message; $('err').classList.remove('hidden'); }
+  finally { $('go').disabled = false; $('go').textContent = 'Tekrar kur'; $('form').classList.remove('scan'); }
+});
+$('print').onclick = () => window.print();
+$('again').onclick = () => { $('is').value = ''; $('is').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); };
+</script>
+</body>
+</html>
